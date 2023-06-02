@@ -2,7 +2,6 @@ package com.client.common;
 
 import lombok.Data;
 
-import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -12,8 +11,8 @@ import java.io.Serializable;
  */
 @Data
 public class DeleteRequest implements Serializable {
-    @Serial
-    private static final long serialVersionUID = 2004855267886403308L;
+
+    private static final long serialVersionUID = 8127634838419383868L;
 
     private long id;
 }

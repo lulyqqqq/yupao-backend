@@ -15,7 +15,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2WebMvc;
 /**
  * @author: 02
  * @date:
- * @ClassName: yupao-backend01
+ * @ClassName: yupao-backend
  * @Description: 自定义 Swagger 接口文档的配置
  */
 @Configuration

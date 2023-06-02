@@ -2,8 +2,6 @@ package com.client.model.VO;
 
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
-
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -15,7 +13,7 @@ import java.util.Date;
 @Data
 public class TeamUserVO implements Serializable {
 
-    @Serial
+
     private static final long serialVersionUID = 1899063007109226944L;
 
     /**

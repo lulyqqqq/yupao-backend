@@ -213,7 +213,7 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
      */
     @Override
     public List<Users> searchUsersByTags(List<String> tagNameList) {
-        if (CollectionUtils.isEmpty(tagNameList)){
+        if (CollectionUtils.isEmpty(tagNameList)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         //1.查询所有用户
@@ -224,14 +224,15 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         // parallelStream() 并发流执行
         return usersList.stream().filter(users -> {
             String tagsStr = users.getTags();
-            if (StringUtils.isBlank(tagsStr)){
+            if (StringUtils.isBlank(tagsStr)) {
                 return false;
             }
-            Set<String> tagNameSet = gson.fromJson(tagsStr, new TypeToken<Set<String>>(){}.getType());
+            Set<String> tagNameSet = gson.fromJson(tagsStr, new TypeToken<Set<String>>() {
+            }.getType());
             //使用Java8中的Optional特性,判断传入可能为空的数据,如果为空就返回指定类型的参数 代替if进行判断,减少复杂度
             tagNameSet = Optional.ofNullable(tagNameSet).orElse(new HashSet<>());
             for (String tagName : tagNameList) {
-                if (!tagNameSet.contains(tagName)){
+                if (!tagNameSet.contains(tagName)) {
                     return false;
                 }
             }
@@ -247,15 +248,15 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
      */
     @Override
     public List<Users> searchUsersByTagsSql(List<String> tagNameList) {
-        if (CollectionUtils.isEmpty(tagNameList)){
+        if (CollectionUtils.isEmpty(tagNameList)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         //1.查询所有用户
         QueryWrapper<Users> queryWrapper = new QueryWrapper<>();
         //拼接 and 查询 sql查询
         //like '%Java%' and like '%C++%'
-        for (String tagName:tagNameList){
-            queryWrapper = queryWrapper.like("tags",tagName);
+        for (String tagName : tagNameList) {
+            queryWrapper = queryWrapper.like("tags", tagName);
         }
         List<Users> usersList = usersMapper.selectList(queryWrapper);
         return usersList.stream().map(this::getSafetyUser).collect(Collectors.toList());
@@ -267,30 +268,30 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
         Users user = (Users) userObj;
 
-        return user !=null && user.getUserRole() == UserConstant.ADMIN_ROLE;
+        return user != null && user.getUserRole() == UserConstant.ADMIN_ROLE;
     }
 
     public boolean isAdmin(Users loginUser) {
         //鉴权
-        return loginUser !=null && loginUser.getUserRole() == UserConstant.ADMIN_ROLE;
+        return loginUser != null && loginUser.getUserRole() == UserConstant.ADMIN_ROLE;
     }
 
-    public int updateUser(Users user,Users loginUser){
+    public int updateUser(Users user, Users loginUser) {
         //1.查询
         long userId = user.getId();
-        if (userId<=0){
+        if (userId <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         //todo 补充更多校验 如果用户没有传任何值 需要判定
 
         //如果是管理员,允许更新任意用户
         //如果不是管理员,只允许更新自己
-        if (!isAdmin(loginUser) && userId != loginUser.getId()){
+        if (!isAdmin(loginUser) && userId != loginUser.getId()) {
             throw new BusinessException(ErrorCode.NO_AUTH);
         }
         //更新数据
         Users oldUser = usersMapper.selectById(userId);
-        if (oldUser == null){
+        if (oldUser == null) {
             throw new BusinessException(ErrorCode.NULL_ERROR);
         }
 
@@ -299,21 +300,22 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
     @Override
     public Users getLoginUser(HttpServletRequest request) {
-        if (request == null){
+        if (request == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
 
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
 
-        if (userObj == null){
+        if (userObj == null) {
             throw new BusinessException(ErrorCode.NO_AUTH);
         }
 
-        return (Users)userObj;
+        return (Users) userObj;
     }
 
     /**
      * 推荐匹配用户
+     *
      * @param num
      * @param loginUser
      * @return
@@ -323,30 +325,33 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         QueryWrapper<Users> queryWrapper = new QueryWrapper<>();
         //只查id和tags字段存在的用户,减少查询时间
         queryWrapper.isNotNull("tags");
-        queryWrapper.select("id","tags");
+        queryWrapper.select("id", "tags");
         List<Users> userList = this.list(queryWrapper);
 
         String tags = loginUser.getTags();
         Gson gson = new Gson();
+        //需要变成的目标tag列表
         List<String> tagList = gson.fromJson(tags, new TypeToken<List<String>>() {
         }.getType());
         // 用户列表的下表 => 相似度'
-        List<Pair<Users,Long>> list = new ArrayList<>();
+        List<Pair<Users, Long>> list = new ArrayList<>();
         // 依次计算当前用户和所有用户的相似度
-        for (int i = 0; i <userList.size(); i++) {
+        for (int i = 0; i < userList.size(); i++) {
             Users user = userList.get(i);
             String userTags = user.getTags();
             //无标签的 或当前用户为自己
-            if (StringUtils.isBlank(userTags) || user.getId() == loginUser.getId()){
+            if (StringUtils.isBlank(userTags) || user.getId() == loginUser.getId()) {
                 continue;
             }
+            //将json字符串转换为字符串数组 用户的tag列表
             List<String> userTagList = gson.fromJson(userTags, new TypeToken<List<String>>() {
             }.getType());
-            //计算分数
+            //计算分数 需要改变多少步变成对象数组
             long distance = AlgorithmUtils.minDistance(tagList, userTagList);
-            list.add(new Pair<>(user,distance));
+            list.add(new Pair<>(user, distance));
         }
-        //按编辑距离有小到大排序
+        //按编辑距离由小到大排序 (a, b) -> (int)
+        // (a.getValue() - b.getValue()) 优先队列的实现 将流的中value的数据进行两两比较,最小的排在最前面依次类推
         List<Pair<Users, Long>> topUserPairList = list.stream()
                 .sorted((a, b) -> (int) (a.getValue() - b.getValue()))
                 .limit(num)
@@ -356,14 +361,14 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
         //根据id查询user完整信息
         QueryWrapper<Users> userQueryWrapper = new QueryWrapper<>();
-        userQueryWrapper.in("id",userListVo);
+        userQueryWrapper.in("id", userListVo);
         Map<Long, List<Users>> userIdUserListMap = this.list(userQueryWrapper).stream()
                 .map(this::getSafetyUser)
                 .collect(Collectors.groupingBy(Users::getId));
 
         // 因为上面查询打乱了顺序，这里根据上面有序的userID列表赋值
         List<Users> finalUserList = new ArrayList<>();
-        for (Long userId : userListVo){
+        for (Long userId : userListVo) {
             finalUserList.add(userIdUserListMap.get(userId).get(0));
         }
         return finalUserList;

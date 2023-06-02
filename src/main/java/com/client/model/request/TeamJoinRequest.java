@@ -2,7 +2,6 @@ package com.client.model.request;
 
 import lombok.Data;
 
-import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -12,7 +11,7 @@ import java.io.Serializable;
  */
 @Data
 public class TeamJoinRequest implements Serializable {
-    @Serial
+
     private static final long serialVersionUID = -681410795620326967L;
 
     /**

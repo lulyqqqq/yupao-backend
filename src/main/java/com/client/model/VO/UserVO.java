@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -66,7 +65,7 @@ public class UserVO implements Serializable {
     private Date createTime;
 
     /**
-     * 
+     *
      */
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date updateTime;
@@ -82,10 +81,10 @@ public class UserVO implements Serializable {
     private String planetCode;
 
     /**
-     *是否已加入队伍
+     * 是否已加入队伍
      */
     private boolean hasJson = false;
 
-    @Serial
+
     private static final long serialVersionUID = 1L;
 }

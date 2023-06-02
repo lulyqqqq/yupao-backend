@@ -2,7 +2,7 @@ package com.client.common;
 
 import lombok.Data;
 
-import java.io.Serial;
+
 import java.io.Serializable;
 
 /**

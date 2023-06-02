@@ -9,6 +9,7 @@ import org.springframework.data.redis.serializer.RedisSerializer;
 
 /**
  *
+ *   redis数据格式序列化
  *  自定义序列化
  *
  */

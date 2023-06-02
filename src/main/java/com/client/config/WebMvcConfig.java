@@ -26,3 +26,28 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .maxAge(3600);
     }
 }
+
+
+
+
+/**
+ * @ClassName: corsConfig
+ * @author: mafangnian
+ * 另一种配置跨域的形式,不限制访问
+ * @date: 2022/12/11 14:58
+ * 跨域解决
+ */
+//@Configuration
+//public class CorsConfig {
+//    @Bean
+//    public CorsFilter corsFilter() {
+//        CorsConfiguration config = new CorsConfiguration();
+//        config.addAllowedOrigin("*");
+//        config.setAllowCredentials(true);
+//        config.addAllowedMethod("*");
+//        config.addAllowedHeader("*");
+//        UrlBasedCorsConfigurationSource configSource = new UrlBasedCorsConfigurationSource();
+//        configSource.registerCorsConfiguration("/**", config);
+//        return new CorsFilter(configSource);
+//    }
+//}
